@@ -1,4 +1,5 @@
 ﻿using System;
+using System.IO;
 using System.Linq;
 using FSMViewer.Model;
 using FSMViewer.Factory;
@@ -14,80 +15,90 @@ namespace FSMViewer
     {
         static void Main(string[] args)
         {
-            try
+            var factory = new StateFactory();
+            var validator = new FSMValidator();
+            var renderer = new TextRenderer();
+
+            FSMModel? loadedModel = null;
+
+            while (true)
             {
-                // Example FSM content
-                var exampleFSM = @"
-                    STATE initial _ ""Start"" : INITIAL;
-                    STATE powered _ ""Main state"" : COMPOUND;
-                    STATE on powered ""Lamp on"" : SIMPLE;
-                    STATE off powered ""Lamp off"" : SIMPLE;
-                    STATE final _ ""Done"" : FINAL;
-                    TRIGGER switch ""Press the switch"";
-                    ACTION turn_on ""Turn lamp on"" : ENTRY_ACTION;
-                    ACTION turn_off ""Turn lamp off"" : EXIT_ACTION;
-                    TRANSITION t1 initial -> off switch """";
-                    TRANSITION t2 off -> on switch """";
-                    TRANSITION t3 on -> off switch """";
-                    TRANSITION t4 powered -> final switch """";
-                ";
-
-                // Build FSM
-                var factory = new StateFactory();
-                var builder = new FSMBuilder(factory);
-                var parser = new FSMParser(builder);
-                var model = parser.ParseFromString(exampleFSM);
-
-                // Validate FSM
-                var validator = new FSMValidator();
-                var errors = validator.Validate(model);
-
-                if (errors.Any())
-                {
-                    Console.WriteLine("=== VALIDATION ERRORS ===");
-                    foreach (var error in errors)
-                    {
-                        Console.WriteLine($"ERROR: {error}");
-                    }
-                    Console.WriteLine();
-                }
-
-                // Render FSM
-                var renderer = new TextRenderer();
-                Console.WriteLine(renderer.Render(model));
-
-                // User options
+                Console.WriteLine();
                 Console.WriteLine("Options:");
                 Console.WriteLine("1. Run simulator");
                 Console.WriteLine("2. Load from file");
                 Console.WriteLine("3. Exit");
                 Console.Write("Choose option (1-3): ");
+                var choice = Console.ReadLine()?.Trim();
+                Console.WriteLine();
 
-                var choice = Console.ReadLine();
                 switch (choice)
                 {
                     case "1":
-                        var simulator = new FSMSimulator(model, renderer);
+                        if (loadedModel == null)
+                        {
+                            Console.WriteLine("Geen FSM geladen! Kies eerst optie 2 om in te laden.");
+                            break;
+                        }
+                        var simulator = new FSMSimulator(loadedModel, renderer);
                         simulator.Run();
                         break;
+
                     case "2":
-                        Console.Write("Enter file path: ");
-                        var filePath = Console.ReadLine();
-                        if (!string.IsNullOrEmpty(filePath))
+                        Console.Write("Enter file name: ");
+                        var input = Console.ReadLine()?.Trim('"').Trim();
+                        Console.WriteLine();
+
+                        if (string.IsNullOrEmpty(input))
                         {
-                            var fileModel = parser.ParseFromFile(filePath);
-                            Console.WriteLine(renderer.Render(fileModel));
+                            Console.WriteLine("Geen bestandsnaam opgegeven.");
+                            break;
+                        }
+
+                        // Zoek in heel project
+                        var matches = Directory.GetFiles(Directory.GetCurrentDirectory(), input, SearchOption.AllDirectories);
+                        if (matches.Length == 0)
+                        {
+                            Console.WriteLine($"Error: bestand niet gevonden: {input}");
+                            break;
+                        }
+                        var path = matches[0];
+                        Console.WriteLine($"Attempting to load FSM from: {path}");
+
+                        try
+                        {
+                            var builder = new FSMBuilder(factory);
+                            var parser = new FSMParser(builder);
+                            var model = parser.ParseFromFile(path);
+
+                            var errors = validator.Validate(model);
+                            if (errors.Any())
+                            {
+                                Console.WriteLine("=== VALIDATION ERRORS ===");
+                                errors.ForEach(err => Console.WriteLine($"ERROR: {err}"));
+                                Console.WriteLine();
+                            }
+
+                            Console.WriteLine("=== FSM MODEL ===");
+                            Console.WriteLine(renderer.Render(model));
+                            Console.WriteLine();
+
+                            loadedModel = model;
+                            Console.WriteLine(">> FSM succesvol geladen. Kies nu optie 1 om te simuleren.");
+                        }
+                        catch (Exception ex)
+                        {
+                            Console.WriteLine($"Error tijdens laden/parsen: {ex.Message}");
                         }
                         break;
+
                     case "3":
+                        return;
+
+                    default:
+                        Console.WriteLine("Ongeldige keuze, probeer opnieuw.");
                         break;
                 }
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error: {ex.Message}");
-                Console.WriteLine("Press any key to exit...");
-                Console.ReadKey();
             }
         }
     }

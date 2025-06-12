@@ -82,34 +82,53 @@ namespace FSMViewer.Validation
         {
             var errors = new List<string>();
 
-            if (model.InitialState == null) return errors;
+            if (model.InitialState == null)
+                return errors;
 
-            var reachableStates = new HashSet<string>();
+            // BFS vanuit initial, maar zorg dat ook ouders en via ouders bereikbare toestanden meedoen
+            var reachable = new HashSet<string>();
             var queue = new Queue<State>();
-            queue.Enqueue(model.InitialState);
-            reachableStates.Add(model.InitialState.Id);
 
-            while (queue.Count > 0)
+            void MarkReachable(State s)
             {
-                var currentState = queue.Dequeue();
-                var outgoingTransitions = model.Transitions.Values
-                    .Where(t => t.Source.Id == currentState.Id);
-
-                foreach (var transition in outgoingTransitions)
+                if (s == null || reachable.Contains(s.Id))
+                    return;
+                reachable.Add(s.Id);
+                queue.Enqueue(s);
+                // Ook alle ouders markeren
+                var p = s.Parent;
+                while (p != null)
                 {
-                    if (!reachableStates.Contains(transition.Target.Id))
-                    {
-                        reachableStates.Add(transition.Target.Id);
-                        queue.Enqueue(transition.Target);
-                    }
+                    if (reachable.Add(p.Id))
+                        queue.Enqueue(p);
+                    p = p.Parent;
                 }
             }
 
-            var unreachableStates = model.States.Keys.Except(reachableStates).ToList();
-            foreach (var stateId in unreachableStates)
+            // start bij initial
+            MarkReachable(model.InitialState);
+
+            while (queue.Count > 0)
             {
-                errors.Add($"State '{stateId}' is not reachable from initial state");
+                var current = queue.Dequeue();
+                // alle uitgaande transitions
+                var outs = model.Transitions.Values
+                    .Where(t => t.Source.Id == current.Id);
+
+                foreach (var t in outs)
+                {
+                    MarkReachable(t.Target);
+                }
             }
+
+            // onbereikbare staten
+            var unreachable = model.States.Values
+                .Where(s => !reachable.Contains(s.Id))
+                .Select(s => s.Id)
+                .ToList();
+
+            foreach (var id in unreachable)
+                errors.Add($"State '{id}' is not reachable from initial state");
 
             return errors;
         }
