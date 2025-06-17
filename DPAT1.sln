@@ -5,6 +5,8 @@ VisualStudioVersion = 17.0.31903.59
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSMViewer", "FSMViewer\FSMViewer.csproj", "{C4773CB3-2931-441C-BDA1-4E679E64B821}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "FSMViewer.Tests", "FSMViewer.Tests\FSMViewer.Tests.csproj", "{1612D4D7-54F2-4293-84CB-BDF9BD511533}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{C4773CB3-2931-441C-BDA1-4E679E64B821}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{C4773CB3-2931-441C-BDA1-4E679E64B821}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{C4773CB3-2931-441C-BDA1-4E679E64B821}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1612D4D7-54F2-4293-84CB-BDF9BD511533}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1612D4D7-54F2-4293-84CB-BDF9BD511533}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1612D4D7-54F2-4293-84CB-BDF9BD511533}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1612D4D7-54F2-4293-84CB-BDF9BD511533}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

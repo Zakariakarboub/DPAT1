@@ -1708,6 +1708,16 @@
         "build": {
           "build/netcoreapp3.1/xunit.runner.visualstudio.props": {}
         }
+      },
+      "FSMViewer/1.0.0": {
+        "type": "project",
+        "framework": ".NETCoreApp,Version=v7.0",
+        "compile": {
+          "bin/placeholder/FSMViewer.dll": {}
+        },
+        "runtime": {
+          "bin/placeholder/FSMViewer.dll": {}
+        }
       }
     }
   },
@@ -5500,10 +5510,16 @@
         "xunit.runner.visualstudio.2.4.5.nupkg.sha512",
         "xunit.runner.visualstudio.nuspec"
       ]
+    },
+    "FSMViewer/1.0.0": {
+      "type": "project",
+      "path": "../FSMViewer/FSMViewer.csproj",
+      "msbuildProject": "../FSMViewer/FSMViewer.csproj"
     }
   },
   "projectFileDependencyGroups": {
     "net7.0": [
+      "FSMViewer >= 1.0.0",
       "Microsoft.NET.Test.Sdk >= 17.7.1",
       "coverlet.collector >= 3.2.0",
       "xunit >= 2.4.2",
@@ -5541,7 +5557,11 @@
       "frameworks": {
         "net7.0": {
           "targetAlias": "net7.0",
-          "projectReferences": {}
+          "projectReferences": {
+            "C:\\Users\\Zakaria\\Documents\\GitHub\\DPAT1\\FSMViewer\\FSMViewer.csproj": {
+              "projectPath": "C:\\Users\\Zakaria\\Documents\\GitHub\\DPAT1\\FSMViewer\\FSMViewer.csproj"
+            }
+          }
         }
       },
       "warningProperties": {
