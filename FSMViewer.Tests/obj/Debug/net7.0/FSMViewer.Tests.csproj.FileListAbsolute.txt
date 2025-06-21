@@ -97,9 +97,10 @@ C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMView
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.AssemblyInfoInputs.cache
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.AssemblyInfo.cs
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.csproj.CoreCompileInputs.cache
-C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.csproj.CopyComplete
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.dll
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\refint\FSMViewer.Tests.dll
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.pdb
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.genruntimeconfig.cache
 C:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\ref\FSMViewer.Tests.dll
+c:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewer.Tests.sourcelink.json
+c:\Users\Zakaria\Documents\GitHub\DPAT1\FSMViewer.Tests\obj\Debug\net7.0\FSMViewe.1AE3D562.Up2Date

@@ -10,6 +10,7 @@ namespace FSMViewer.Parser
     public class FSMParser
     {
         private readonly IFSMBuilder _builder;
+        private string? _currentTransitionId;
 
         public FSMParser(IFSMBuilder builder)
         {
@@ -26,33 +27,28 @@ namespace FSMViewer.Parser
 
         public FSMModel ParseFromString(string content)
         {
-            // 1) Verwijder per regel alles na een '#' (inclusief de '#')
+            // 1) verwijder comments
             var uncommented = Regex.Replace(content, @"#.*", string.Empty);
-            // 2) Split op ';' om losse statements te krijgen
+            // 2) split op ';'
             var segments = uncommented
                 .Split(new[] { ';' }, StringSplitOptions.RemoveEmptyEntries)
                 .Select(s => s.Trim())
-                .Where(s => !string.IsNullOrEmpty(s))
+                .Where(s => s.Length > 0)
                 .ToList();
 
             foreach (var line in segments)
             {
-                if (line.StartsWith("STATE", StringComparison.OrdinalIgnoreCase))
-                    ParseState(line);
-                else if (line.StartsWith("TRIGGER", StringComparison.OrdinalIgnoreCase))
-                    ParseTrigger(line);
-                else if (line.StartsWith("ACTION", StringComparison.OrdinalIgnoreCase))
-                    ParseAction(line);
-                else if (line.StartsWith("TRANSITION", StringComparison.OrdinalIgnoreCase))
-                    ParseTransition(line);
-                else
-                    Console.WriteLine($"[Parser warning] onbekende regel genegeerd: '{line}'");
+                if (line.StartsWith("STATE", StringComparison.OrdinalIgnoreCase)) ParseState(line);
+                else if (line.StartsWith("TRIGGER", StringComparison.OrdinalIgnoreCase)) ParseTrigger(line);
+                else if (line.StartsWith("ACTION", StringComparison.OrdinalIgnoreCase)) ParseAction(line);
+                else if (line.StartsWith("TRANSITION", StringComparison.OrdinalIgnoreCase)) ParseTransition(line);
+                else Console.WriteLine($"[Parser warning] onbekende regel genegeerd: '{line}'");
             }
 
             return _builder.Build();
         }
 
-        // Regex voor STATE <id> <parent|_> "<name>" : <type>
+        // STATE <id> <parent|_> "<name>" : <type>
         static readonly Regex StateRegex = new Regex(
             @"^\s*STATE\s+(\w+)\s+(\w+|_)\s+""([^""]*)""\s*:\s*(\w+)\s*$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled
@@ -81,7 +77,7 @@ namespace FSMViewer.Parser
             _builder.AddState(id, name, type, parent);
         }
 
-        // Regex voor TRIGGER <id> "<desc>"
+        // TRIGGER <id> "<desc>"
         static readonly Regex TriggerRegex = new Regex(
             @"^\s*TRIGGER\s+(\w+)\s+""([^""]*)""\s*$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled
@@ -95,12 +91,13 @@ namespace FSMViewer.Parser
                 Console.WriteLine($"[Parser warning] invalid TRIGGER: {line}");
                 return;
             }
+
             var id = m.Groups[1].Value;
             var desc = m.Groups[2].Value;
             _builder.AddTrigger(id, desc);
         }
 
-        // Regex voor ACTION <id> "<desc>" : <type>
+        // ACTION <id> "<desc>" : <type>
         static readonly Regex ActionRegex = new Regex(
             @"^\s*ACTION\s+(\w+)\s+""([^""]*)""\s*:\s*(\w+)\s*$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled
@@ -114,18 +111,47 @@ namespace FSMViewer.Parser
                 Console.WriteLine($"[Parser warning] invalid ACTION: {line}");
                 return;
             }
-            var id = m.Groups[1].Value;
-            var desc = m.Groups[2].Value;
+
+            var actionId = m.Groups[1].Value;
+            var actionName = m.Groups[2].Value;
             var typeStr = m.Groups[3].Value;
+
             if (!Enum.TryParse<ActionType>(typeStr, true, out var actionType))
             {
                 Console.WriteLine($"[Parser warning] onbekend ActionType '{typeStr}' in: {line}");
                 return;
             }
-            _builder.AddAction(id, desc, actionType);
+
+            // 1) registreer actie
+            _builder.AddAction(actionId, actionName, actionType);
+
+            // 2) koppel aan juiste target
+            switch (actionType)
+            {
+                case ActionType.ENTRY_ACTION:
+                    // moet meteen de stateId uit de regel parsen:
+                    var entryStateId = line.Split()[1];
+                    _builder.AddEntryAction(entryStateId, actionId);
+                    break;
+
+                case ActionType.EXIT_ACTION:
+                    var exitStateId = line.Split()[1];
+                    _builder.AddExitAction(exitStateId, actionId);
+                    break;
+
+                case ActionType.DO_ACTION:
+                    var doStateId = line.Split()[1];
+                    _builder.AddDoAction(doStateId, actionId);
+                    break;
+
+                case ActionType.TRANSITION_ACTION:
+                    // Koppel op actionId == transitionId, ongeacht _currentTransitionId
+                    _builder.AddTransitionAction(actionId, actionId);
+                    break;
+            }
         }
 
-        // Regex voor TRANSITION <id> <source> -> <target> [trigger] ["guard"]
+        // TRANSITION <id> <source> -> <target> [trigger] ["guard"]
         static readonly Regex TransitionRegex = new Regex(
             @"^\s*TRANSITION\s+(\w+)\s+(\w+)\s*->\s*(\w+)(?:\s+(\w+))?(?:\s+""([^""]*)"")?\s*$",
             RegexOptions.IgnoreCase | RegexOptions.Compiled
@@ -140,11 +166,13 @@ namespace FSMViewer.Parser
                 return;
             }
 
-            var id = m.Groups[1].Value;
+            _currentTransitionId = m.Groups[1].Value;
+
+            var id = _currentTransitionId;
             var source = m.Groups[2].Value;
             var target = m.Groups[3].Value;
 
-            // Als er geen trigger meegegeven is, maken we een anonieme trigger aan
+            // trigger
             string triggerId = m.Groups[4].Success && m.Groups[4].Value.Length > 0
                 ? m.Groups[4].Value
                 : $"__{id}__";

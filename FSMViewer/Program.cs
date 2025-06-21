@@ -77,6 +77,7 @@ namespace FSMViewer
                                 Console.WriteLine("=== VALIDATION ERRORS ===");
                                 errors.ForEach(err => Console.WriteLine($"ERROR: {err}"));
                                 Console.WriteLine();
+                                break;
                             }
 
                             Console.WriteLine("=== FSM MODEL ===");

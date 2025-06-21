@@ -39,6 +39,7 @@ namespace FSMViewer.Tests
             Assert.Contains("Executing transition: init -> s1", log);
             Assert.Contains("FSM reset to initial state", log);
             // Verify model.CurrentState is initial
+            Assert.NotNull(model.CurrentState);
             Assert.Equal("init", model.CurrentState.Id);
         }
 

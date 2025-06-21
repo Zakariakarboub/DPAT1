@@ -16,6 +16,7 @@ namespace FSMViewer.Model
         public State? Parent { get; set; }
         public List<State> Children { get; set; } = new();
         public List<FSMAction> EntryActions { get; set; } = new();
+        public List<FSMAction> DoActions { get; set; } = new();  // ← toegevoegd
         public List<FSMAction> ExitActions { get; set; } = new();
 
         protected State(string id, string name, StateType type)

@@ -2,7 +2,10 @@ namespace FSMViewer.Model
 {
     public enum ActionType
     {
-        ENTRY_ACTION, EXIT_ACTION, TRANSITION_ACTION
+        ENTRY_ACTION,
+        EXIT_ACTION,
+        DO_ACTION,            // ← nieuw
+        TRANSITION_ACTION
     }
 
     public class FSMAction

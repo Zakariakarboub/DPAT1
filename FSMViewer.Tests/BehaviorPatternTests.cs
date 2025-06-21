@@ -65,6 +65,7 @@ namespace FSMViewer.Tests
             var log = outputWriter.ToString();
             Assert.Contains("Executing transition: s1 -> s2", log);
             // Model's current state updated
+            Assert.NotNull(model.CurrentState);
             Assert.Equal("s2", model.CurrentState.Id);
         }
 
